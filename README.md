@@ -79,9 +79,9 @@ Client:
 - [Shazam](http://www.ee.columbia.edu/~dpwe/papers/Wang03-shazam.pdf "shazam")
 - [Mel scale](https://en.wikipedia.org/wiki/Mel_scale "Mel_scale")
 
-本算法实现类似Shazam，首先我计算出音频的频谱图，将频谱根据频率分成若干子带，对每个子带查找若干个峰值点，本算法子带划分基于Mel频率，如图所示：
+本算法实现类似Shazam，首先我计算出音频的频谱图，将频谱根据频率分成若干子带，对每个子带查找若干个峰值点，本算法子带划分基于Mel频率。
 
-将获得的峰值点根据频率、时间范围组成点对，如图所示：
+将获得的峰值点根据频率、时间范围组成点对。
 
 本算法的取点对频率范围为在子带内，其目的在于减少点对的数目并且提高分布式能力。取点对的时间范围为1s-4s。你可以根据需要修改这些参数。
 
