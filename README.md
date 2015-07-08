@@ -9,6 +9,7 @@
 
 ##简易使用方法
 依赖的库：com.springsource.org.json，JTransforms，mysql-connector-java
+
 1. 需要安装MySQL，并执行Fingerprint. sql， 同时你可能需要修改max_allowed_packet参数，因为添加歌曲需要发送较大的包，我采用的参数是32M。
 2. 修改MysqlDB中的数据库信息为你的数据库信息，如：
 
