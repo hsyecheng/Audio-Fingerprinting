@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import static yecheng.music.database.Index.Hash2id;
 
@@ -57,6 +58,7 @@ public class Server {
                     }
                     idList.add(node);
                 }
+                rs.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -68,6 +70,7 @@ public class Server {
             hashMap.clear();
             for(int i = 0; i < linkHash.length; i ++){
                 final ArrayList<Node> list = Database.get(linkHash[i]);
+                if(list == null) continue;
                 final int time = linkTime[i];
                 list.forEach(node -> {
                     long idHash = Index.idHash(node.id, node.time - time);
@@ -80,8 +83,13 @@ public class Server {
             maxId = -1;
             maxCount = -1;
 
+            Map<Long,Integer> list = new HashMap<>();
             hashMap.forEach((hash, integer) -> {
-                if(integer > minHit && integer > maxCount){
+                if (integer > minHit) {
+                    list.put(hash,integer);
+                }
+
+                if (integer > minHit && integer > maxCount) {
                     maxId = hash;
                     maxCount = integer;
                 }
@@ -134,7 +142,7 @@ public class Server {
                         buf.rewind();
                     }
 
-                    int id = dataBase.search(time, link, 15);
+                    int id = dataBase.search(time, link, 18);
                     JSONObject jsonObject = mysqlDB.getByID(id);
                     PrintWriter writer = new PrintWriter(socket.getOutputStream());
                     if(jsonObject == null)
