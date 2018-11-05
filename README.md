@@ -1,4 +1,4 @@
-#Music recognition system
+# Music recognition system
 
 ----------
 
@@ -8,7 +8,7 @@ By generating and recording music fingerprints, he is able to recognize music fr
 
 You can adjust the parameters inside according to your needs. The current parameters are to identify the source of noise and distortion in a short time. About 1500 files will produce nearly 24 million fingerprint data. If you only use it to identify files and there is no serious noise and distortion, you can modify the parameters. One file can be identified with only a small amount of fingerprints. For the less noise source, 200 fingerprints have already met most of the requirements.
 
-##Easy to use
+## Easy to use
 Dependent libraries: com.springsource.org.json, JTransforms, mysql-connector-java
 1. You need to install MySQL and execute Fingerprint.sql. You may need to modify the max_allowed_packet parameter, because adding a song requires sending a larger package. The parameter I am using is 32M.
 2. Modify the database information in MysqlDB for your database information.
@@ -23,7 +23,7 @@ Dependent libraries: com.springsource.org.json, JTransforms, mysql-connector-jav
     - You can call Search+ filename search.
     - In the case of a large database, it is recommended to run Server and search using Client+ filename.
 
-##Introduction of main parameters
+## Introduction of main parameters
 
     NPeaks: the number of peak points per subband in a cycle
     fftSize: the window size of the FFT
@@ -59,7 +59,7 @@ Ip: server ip
 Port: the port of the server
 
 
-##Performance and effects
+## Performance and effects
 **Data volume: **The music library is 1500 songs, the number of fingerprints is about 24 million, and the server takes up about 340M after being stable.
 
 **Speed: **Processor i7-3632QM, adding 1500 songs takes about 1919 seconds, and a song takes about 1.3 seconds. It takes about 0.2 seconds to find a 10s song using the server (regardless of the time the client reads the file).
@@ -68,7 +68,7 @@ Port: the port of the server
 
 **Anti-noise: ** can resist strong distortion and noise, you can refer to the test audio I gave.
 
-##Working principle
+## Working principle
 Reference documentation:
 
 - [Shazam](http://www.ee.columbia.edu/~dpwe/papers/Wang03-shazam.pdf "shazam")
