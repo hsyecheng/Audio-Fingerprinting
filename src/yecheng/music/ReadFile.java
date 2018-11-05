@@ -20,6 +20,7 @@ public class ReadFile {
     public String Title;
     public String Album;
     public String Artist;
+    public double audio_length;
 
     public ReadFile() {
         super();
@@ -29,8 +30,8 @@ public class ReadFile {
         String[] strings = filename.split("}}");
         if(strings.length < 3){
             Title = filename;
-            Album = "";
-            Artist = "";
+            Album = "Advertisement";
+            Artist = "Advertisement";
             return;
         }
         Title = strings[0];
@@ -88,6 +89,7 @@ public class ReadFile {
         }
 
         int fs = 8000;
+        this.audio_length = len/(float)fs;
         fingerprint = new Fingerprint(data, fs);
         getTabs(file.getName());
     }

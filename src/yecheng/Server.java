@@ -39,7 +39,7 @@ public class Server {
             Database = new HashMap<>(2560000);
             hashMap = new HashMap<>(4000000);
 
-            MysqlDB sqlDB = new MysqlDB();
+            MysqlDB sqlDB = new MysqlDB("127.0.0.1", 3306, "musiclibary", "root", "dejavu");
             ResultSet rs = sqlDB.listAll();
 
             try {
@@ -105,7 +105,7 @@ public class Server {
         ServerDataBase dataBase = new ServerDataBase();
         System.gc();
         System.out.println("Complete!");
-        MysqlDB mysqlDB = new MysqlDB();
+        MysqlDB mysqlDB = new MysqlDB("127.0.0.1", 3306, "musiclibary", "user", "pass");
 
         try {
             ServerSocket serverSocket = new ServerSocket(port);
