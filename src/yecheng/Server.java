@@ -38,8 +38,12 @@ public class Server {
             super();
             Database = new HashMap<>(2560000);
             hashMap = new HashMap<>(4000000);
-
-            MysqlDB sqlDB = new MysqlDB("127.0.0.1", 3306, "musiclibary", "root", "dejavu");
+            String database = System.getenv().getOrDefault("YECHENG_DATABASE_NAME", "musiclibary");
+            int port = Integer.parseInt(System.getenv().getOrDefault("YECHENG_DATABASE_PORT", "3306"));
+            String host = System.getenv().getOrDefault("YECHENG_DATABASE_HOST", "localhost");
+            String user = System.getenv().getOrDefault("YECHENG_DATABASE_USER", "user");
+            String pass = System.getenv().getOrDefault("YECHENG_DATABASE_PASS", "pass");
+            MysqlDB sqlDB = new MysqlDB(host, port, database, user, pass);
             ResultSet rs = sqlDB.listAll();
 
             try {
@@ -105,7 +109,12 @@ public class Server {
         ServerDataBase dataBase = new ServerDataBase();
         System.gc();
         System.out.println("Complete!");
-        MysqlDB mysqlDB = new MysqlDB("127.0.0.1", 3306, "musiclibary", "user", "pass");
+        String database = System.getenv().getOrDefault("YECHENG_DATABASE_NAME", "musiclibary");
+        int port = Integer.parseInt(System.getenv().getOrDefault("YECHENG_DATABASE_PORT", "3306"));
+        String host = System.getenv().getOrDefault("YECHENG_DATABASE_HOST", "localhost");
+        String user = System.getenv().getOrDefault("YECHENG_DATABASE_USER", "user");
+        String pass = System.getenv().getOrDefault("YECHENG_DATABASE_PASS", "pass");
+        MysqlDB mysqlDB = new MysqlDB(host, port, database, user, pass);
 
         try {
             ServerSocket serverSocket = new ServerSocket(port);

@@ -13,7 +13,12 @@ import java.io.File;
 @SuppressWarnings("WeakerAccess")
 public class Search {
     public static void main(String[] arg){
-        MysqlDB db = new MysqlDB("127.0.0.1", 3306, "musiclibary", "user", "pass");
+        String database = System.getenv().getOrDefault("YECHENG_DATABASE_NAME", "musiclibary");
+        int port = Integer.parseInt(System.getenv().getOrDefault("YECHENG_DATABASE_PORT", "3306"));
+        String host = System.getenv().getOrDefault("YECHENG_DATABASE_HOST", "localhost");
+        String user = System.getenv().getOrDefault("YECHENG_DATABASE_USER", "user");
+        String pass = System.getenv().getOrDefault("YECHENG_DATABASE_PASS", "pass");
+        MysqlDB db = new MysqlDB(host, port, database, user, pass);
         Index index = new Index();
         ReadFile rf = new ReadFile();
         File file = null;
