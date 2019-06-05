@@ -1,13 +1,13 @@
 package yecheng.music.database;
 
+import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import yecheng.music.ReadFile;
 import yecheng.music.fingerprint.Fingerprint;
 
 import java.io.File;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by hsyecheng on 2015/6/12.
@@ -19,16 +19,48 @@ public class MysqlDB {
     private PreparedStatement insertMusic;
 
     private final String driver = "com.mysql.jdbc.Driver";
-    private final String url = "jdbc:mysql://127.0.0.1:3306/musiclibary?user=yecheng";
-    private final String user = "yecheng";
-    private final String password = "yecheng";
+    private final String url;
+    private final String host;
+    private final int port;
+    private final String database;
+    private final String user;
+    private final String password;
+    private final String CREATE_MUSIC_INFO_TABLE_QUERY = "CREATE TABLE IF NOT EXISTS `MusicInfo` (" +
+            "`id` INT NOT NULL AUTO_INCREMENT," +
+            "`Title` VARCHAR(200)," +
+            "`Artist` VARCHAR(200)," +
+            "`Album` VARCHAR(200)," +
+            "`FileDir` VARCHAR(400) NULL," +
+            "`InfoDir` VARCHAR(400) NULL," +
+            "`audio_length` double," +
+            "PRIMARY KEY (`id`)," +
+            "UNIQUE INDEX `id_UNIQUE` (`id` ASC))" +
+            "ENGINE = InnoDB;";
+    private final String CREATE_HASH_TABLE_QUERY = "CREATE TABLE IF NOT EXISTS `HashTable` (" +
+            "`idHashTable` INT NOT NULL AUTO_INCREMENT," +
+            "`Hash` INT NOT NULL," +
+            "`MusicInfo_id` INT NOT NULL," +
+            "`Time` INT NOT NULL," +
+            "PRIMARY KEY (`idHashTable`)," +
+            "FOREIGN KEY  (`MusicInfo_id`) REFERENCES `MusicInfo` (`id`) ON DELETE CASCADE," +
+            "INDEX `Hash` (`Hash` ASC)  " +
+            "KEY_BLOCK_SIZE=1)" +
+            "ENGINE = InnoDB;";
+    private final String INSERT_SONG_QUERY = "INSERT INTO `MusicInfo` " +
+            "(`Title`, `Artist`, `Album`, `FileDir`, `InfoDir`, audio_length) " +
+            "VALUES ( ? , ? , ? , ? , ? , ? );";
 
-    public MysqlDB() {
+    public MysqlDB(String host, int port, String database, String user, String password) {
         super();
-
+        this.host = host;
+        this.port = port;
+        this.database = database;
+        this.user = user;
+        this.password = password;
+        this.url = "jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database + "?user=" + this.user;
         try {
             Class.forName(driver);
-            dbConn = DriverManager.getConnection(url, user, password);
+            dbConn = DriverManager.getConnection(url, this.user, this.password);
             if(dbConn.isClosed())
                 throw new Exception("can not open Database");
             dbStatement = dbConn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -37,11 +69,10 @@ public class MysqlDB {
             e.printStackTrace();
         }
 
-        String exec = "INSERT INTO `musiclibary`.`musicinfo` " +
-                "(`Title`, `Artist`, `Album`, `FileDir`, `InfoDir`) " +
-                "VALUES ( ? , ? , ? , ? , ? );";
         try {
-            insertMusic = dbConn.prepareStatement(exec, Statement.RETURN_GENERATED_KEYS);
+            insertMusic = dbConn.prepareStatement(INSERT_SONG_QUERY, Statement.RETURN_GENERATED_KEYS);
+            dbConn.createStatement().executeUpdate(CREATE_MUSIC_INFO_TABLE_QUERY);
+            dbConn.createStatement().executeUpdate(CREATE_HASH_TABLE_QUERY);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -63,24 +94,18 @@ public class MysqlDB {
         String Title = readFile.Title;
         String Artist = readFile.Artist;
         String Album = readFile.Album;
+        double audio_length = readFile.audio_length;
         String InfoDir = "";
-
-        /*String exec = "INSERT INTO `musiclibary`.`musicinfo` " +
-                "(`Title`, `Artist`, `Album`, `FileDir`, `InfoDir`) " +
-                "VALUES ('" + stringReplace("") + "', '" + stringReplace("") + "', '" + stringReplace("") + "', '"
-                + stringReplace(fileDir) + "','" + stringReplace("") + "');";*/
 
         int id;
 
-        /*String exec = "INSERT INTO `musiclibary`.`musicinfo` " +
-                "(`Title`, `Artist`, `Album`, `FileDir`, `InfoDir`) " +
-                "VALUES ('?,?,?,?,?);";*/
         try {
             insertMusic.setString(1,Title);
             insertMusic.setString(2,Artist);
             insertMusic.setString(3,Album);
-            insertMusic.setString(4, fileDir);
+            insertMusic.setString(4,fileDir);
             insertMusic.setString(5,InfoDir);
+            insertMusic.setDouble(6,audio_length);
             insertMusic.executeUpdate();
 
             ResultSet rs=insertMusic.getGeneratedKeys();
@@ -93,24 +118,8 @@ public class MysqlDB {
             return;
         }
 
-        /*int id;
-        ResultSet rs;
-        exec = "select idMusicInfo from `musiclibary`.`musicinfo` " +
-                "where FileDir='" + stringReplace(fileDir) +   "';";
-        try {
-            rs = dbStatement.executeQuery(exec);
-            rs.next();
-            id = rs.getInt(1);
-            rs.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }*/
-
-
-
-        StringBuilder buf = new StringBuilder("INSERT INTO `musiclibary`.`hashtable` " +
-                "(`Hash`, `ID`, `Time`) " +
+        StringBuilder buf = new StringBuilder("INSERT INTO `HashTable` " +
+                "(`Hash`, `MusicInfo_id`, `Time`) " +
                 "VALUES");
 
         for(Fingerprint.Link link : fp.getLinkList()){
@@ -121,24 +130,17 @@ public class MysqlDB {
 
         try {
             dbStatement.execute(buf.toString());
-        } catch (SQLException e) {
+        }catch(MySQLSyntaxErrorException e){
+            System.err.print("SQL Syntax error: " + buf.toString());
+        }catch (SQLException e) {
             System.out.print(e.getSQLState());
             e.printStackTrace();
         }
-        /*exec = "INSERT INTO `musiclibary`.`hashtable` " +
-                "(`Hash`, `ID`, `Time`) " +
-                "VALUES ('" + stringReplace("") + "', '" + stringReplace("") + "', '" + stringReplace("") + "');";
-        try {
-            dbStatement.execute(exec);
-        } catch (SQLException e) {
-            System.out.print(e.getSQLState());
-            e.printStackTrace();
-        }*/
     }
 
     @SuppressWarnings("unused")
     public synchronized ResultSet search(int hash){
-        String exec = "SELECT * from `musiclibary`.`hashtable` WHERE Hash="+ hash + ";";
+        String exec = "SELECT * from `HashTable` WHERE Hash="+ hash + ";";
 
         ResultSet resultSet;
         try {
@@ -152,7 +154,7 @@ public class MysqlDB {
 
     public synchronized ResultSet searchAll(int[] hash){
         int len = hash.length;
-        String tmp1 = "SELECT * FROM `musiclibary`.`hashtable` WHERE Hash in(";
+        String tmp1 = "SELECT * FROM `HashTable` WHERE Hash in(";
         StringBuilder exec = new StringBuilder();
 
         exec.append(tmp1);
@@ -173,7 +175,7 @@ public class MysqlDB {
     }
 
     public synchronized ResultSet listAll(){
-        String exec = "SELECT * FROM `musiclibary`.`hashtable`";
+        String exec = "SELECT * FROM `HashTable`";
         ResultSet resultSet;
         try {
             resultSet = dbStatement.executeQuery(exec);
@@ -185,7 +187,7 @@ public class MysqlDB {
     }
 
     public synchronized JSONObject getByID(int id){
-        String exec = "SELECT * FROM `musiclibary`.`musicinfo` WHERE idMusicInfo=" + id;
+        String exec = "SELECT Title, Artist, Album, audio_length FROM `MusicInfo` WHERE id=" + id;
         ResultSet resultSet;
         try {
             resultSet = dbStatement.executeQuery(exec);
@@ -193,21 +195,23 @@ public class MysqlDB {
             e.printStackTrace();
             return null;
         }
-        Map<String,String> map = new HashMap<>();
+        JSONObject map = new JSONObject();
         try {
             while (resultSet.next()){
-                String Title = resultSet.getString(2);
-                String Artist = resultSet.getString(3);
-                String Album = resultSet.getString(4);
+                String Title = resultSet.getString(1);
+                String Artist = resultSet.getString(2);
+                String Album = resultSet.getString(3);
+                double audio_length = resultSet.getDouble(4);
 
-                map.put("Title",Title);
-                map.put("Artist",Artist);
-                map.put("Album",Album);
+                map = map.put("Title",Title).put("Artist",Artist).put("Album",Album).put("audio_length", audio_length);
             }
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }catch (JSONException e) {
+            e.printStackTrace();
+            return null;
         }
-        return new JSONObject(map);
+        return map;
     }
 }

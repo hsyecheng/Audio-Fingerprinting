@@ -16,10 +16,13 @@ import java.nio.ByteOrder;
  * The sampling rate of the WAV file should be 8000.
  */
 public class ReadFile {
+
+    private static final int SAMPLE_RATE = 8000;
     public Fingerprint fingerprint;
     public String Title;
     public String Album;
     public String Artist;
+    public double audio_length;
 
     public ReadFile() {
         super();
@@ -28,9 +31,9 @@ public class ReadFile {
     private void getTabs(String filename){
         String[] strings = filename.split("}}");
         if(strings.length < 3){
-            Title = filename;
-            Album = "";
-            Artist = "";
+            Title = filename.replace(".wav", "");
+            Album = "Advertisement";
+            Artist = "Advertisement";
             return;
         }
         Title = strings[0];
@@ -54,8 +57,8 @@ public class ReadFile {
             throw new Exception("Encoding must be PCM_SIGNED!");
         }
 
-        if(format.getSampleRate() != 8000){
-            throw new Exception("SampleRate must be 8000!");
+        if(format.getSampleRate() != SAMPLE_RATE){
+            throw new Exception("SampleRate must be " + SAMPLE_RATE + "!");
         }
 
         int len = (int) stream.getFrameLength();
@@ -87,8 +90,8 @@ public class ReadFile {
             data[i] /= 2;
         }
 
-        int fs = 8000;
-        fingerprint = new Fingerprint(data, fs);
+        this.audio_length = len/(float)SAMPLE_RATE;
+        fingerprint = new Fingerprint(data, SAMPLE_RATE);
         getTabs(file.getName());
     }
 }

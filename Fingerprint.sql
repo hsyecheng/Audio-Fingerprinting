@@ -22,11 +22,12 @@ USE `musiclibary` ;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `musiclibary`.`MusicInfo` (
   `idMusicInfo` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `Title` VARCHAR(200) NULL,
-  `Artist` VARCHAR(200) NULL,
-  `Album` VARCHAR(200) NULL,
+  `Title` VARCHAR(200),
+  `Artist` VARCHAR(200),
+  `Album` VARCHAR(200),
   `FileDir` VARCHAR(400) NULL,
   `InfoDir` VARCHAR(400) NULL,
+  `audio_length` double,
   PRIMARY KEY (`idMusicInfo`, `Title`, `Album`, `Artist`),
   UNIQUE INDEX `idMusicInfo_UNIQUE` (`idMusicInfo` ASC))
 ENGINE = InnoDB;
@@ -42,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `musiclibary`.`HashTable` (
   `Time` INT NOT NULL,
   PRIMARY KEY (`idHashTable`),
   INDEX `Hash` (`Hash` ASC)  KEY_BLOCK_SIZE=1)
-ENGINE = InnoDB
+ENGINE = InnoDB;
 ROW_FORMAT = FIXED;
 
 
