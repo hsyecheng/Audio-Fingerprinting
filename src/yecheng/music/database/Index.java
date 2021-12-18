@@ -100,7 +100,7 @@ public class Index {
     }
 
     public static Long idHash(int id, int time){
-        return (long) ((id << 16) + time + (1 << 15));
+        return ((long) id << 16) + time + (1 << 15);
     }
 
     public static int Hash2id(Long idHash){
