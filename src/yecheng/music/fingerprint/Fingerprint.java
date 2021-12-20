@@ -23,7 +23,6 @@ public class Fingerprint {
 
     private final float[] range_time = {1f, 3f};
     private final float[] range_freq = {-600f, 600f};
-    //private final float[] melBand = MelFreq.MelBand(new float[] {150f, 550f, 950f, 1350f, 1750f});
     private final int[] Band = {11,22,35,50,69,91,117,149,187,231};
 
     private final float minFreq = 100;
@@ -87,16 +86,6 @@ public class Fingerprint {
 
                     tmp.add(p);
                 }
-
-
-                //if (true) {
-                /*tmp.sort((o1, o2) ->
-                                Double.compare(o2.power, o1.power)
-                );
-                int end = tmp.size() < NPeaks ? tmp.size() : NPeaks;
-                peakList.addAll(tmp.subList(0, end));
-                tmp.clear();*/
-                //}
             }
         }
 
@@ -157,7 +146,6 @@ public class Fingerprint {
                     int b1 = inBand(p1.intFreq);
                     int b2 = inBand(p2.intFreq);
 
-                    //TODO
                     if(b1 == b2 && b1 != -1){
                         Link l = new Link(p1, p2);
                         linkList.add(l);

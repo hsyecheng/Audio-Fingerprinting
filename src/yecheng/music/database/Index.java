@@ -2,6 +2,8 @@ package yecheng.music.database;
 
 import yecheng.music.fingerprint.Fingerprint;
 import yecheng.music.fingerprint.Hash;
+import yecheng.music.model.Match;
+import yecheng.music.model.SongMatch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,7 +32,7 @@ public class Index {
         }
     }
 
-    private final HashMap<Long,Integer> hashMap;
+    private final HashMap<Long, Match> hashMap;
     private MysqlDB sqlDB;
     public Index() {
         super();
@@ -43,9 +45,9 @@ public class Index {
 
     private long maxId = -1;
     private int maxCount = -1;
-    public int search(Fingerprint fp, @SuppressWarnings("SameParameterValue") int minHit){
+    private int maxTime = -1;
+    public SongMatch search(Fingerprint fp, @SuppressWarnings("SameParameterValue") int minHit){
         ArrayList<Fingerprint.Link> linkList =  fp.getLinkList();
-
         int[] linkHash = new int[linkList.size()];
         int[] linkTime = new int[linkList.size()];
         for(int i = 0; i < linkHash.length; i ++){
@@ -57,7 +59,7 @@ public class Index {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public int search(int[] linkTime, int[] linkHash, int minHit){
+    public SongMatch search(int[] linkTime, int[] linkHash, int minHit){
         HashMap<Integer,Integer> linkHashMap = new HashMap<>(linkHash.length);
         for(int i = 0; i < linkHash.length; i ++){
             linkHashMap.put(linkHash[i],linkTime[i]);
@@ -72,31 +74,33 @@ public class Index {
                 int time = rs.getInt(4);
                 
                 //Hits hits = new Hits(id, linkHashMap.get(hash) - time);
-                Integer count;
+                Match count;
                 //if(hashMap.containsKey(hits))
                 Long idHash = idHash(id,linkHashMap.get(hash) - time);
                 count = hashMap.get(idHash);
-                if(count == null) count = 0;
-                hashMap.put(idHash,count + 1);
+                if(count == null) count = new Match(0, linkHashMap.get(hash) - time);
+                count.updateCount();
+                hashMap.put(idHash,count);
             }
             rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            return -1;
+            return new SongMatch(-1, new Match(-1, -1));
         }
 
-        hashMap.forEach((hash, integer) -> {
-            if(integer > minHit && integer > maxCount){
+        hashMap.forEach((hash, countTime) -> {
+            if(countTime.getCount() > minHit && countTime.getCount() > maxCount){
                 maxId = hash;
-                maxCount = integer;
+                maxCount = countTime.getCount();
+                maxTime = countTime.getTime();
             }
         });
-
-        return Hash2id(maxId);
+        Integer offset = -maxTime;
+        return new SongMatch(Hash2id(maxId),  new Match(maxCount, offset));
     }
 
     public static Long idHash(int id, int time){
-        return (long) ((id << 16) + time + (1 << 15));
+        return ((long) id << 16) + time + (1 << 15);
     }
 
     public static int Hash2id(Long idHash){
